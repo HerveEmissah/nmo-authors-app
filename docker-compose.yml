@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+
+  web:
+    container_name: nmo-authors-app
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/app'
+      - '/app/node_modules'
+    ports:
+      - 8181:80
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - 'nmo_network'
