@@ -1,5 +1,5 @@
 # nmo-authors-app
-Frontend React App to search & fetch nmo literature citations given a pmid or doi </br>
+Frontend React App to search & fetch nmo literature citations given a pmid or doi. </br></br>
 #Build container: </br>
 docker build -t nmo-authors-app:dev . </br></br>
 #Run the container: </br>
