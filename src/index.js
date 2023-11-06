@@ -19,24 +19,118 @@ export default class App extends React.Component {
       res1Message1: 'To the best of our knowledge, the NeuroMorpho.Org dataset described in this reference has not yet been cited or ',
       res1Message2: 'used in subsequent publications. If you are aware of evidence to the contrary, please contact ',
       res2Message1: 'This reference does not describe a NeuroMorpho.Org dataset.',
-      res2Message2: 'If you think a correction is needed, please contact '
+      res2Message2: 'If you think a correction is needed, please contact ',
+      displayedPmids: new Set(),
+      displayedDois: new Set(),
+      displayedDownloads: new Set(),
+      displayedAvgDownloads: new Set(),
+      uniqueRecords: []
     }
   };
 
+  handleUniqueRecords(item) {
+    const newUniqueRecords = this.state.citations
+      .map((c) => ({
+        pmid: c.data && c.data.hasOwnProperty('pmid') ? c.data.pmid : !isNaN(c.id) ? c.id : null,
+        doi: c.data && c.data.hasOwnProperty('doi') ? c.data.doi : (Number.isInteger(Number(c.id)) ? null : c.id),
+        //Number_of_Downloads: c.data && c.data.hasOwnProperty('Number_of_Downloads') ? c.data.Number_of_Downloads : "N/A",
+        Number_of_Downloads: c.data && c.data.hasOwnProperty('Number_of_Downloads') ? (c.data.Number_of_Downloads !== null ? c.data.Number_of_Downloads : 0) : "N/A",
+        //Avg_Downloads_Per_Cell: c.data && c.data.hasOwnProperty('Avg_Downloads_Per_Cell') ? c.data.Avg_Downloads_Per_Cell : "N/A",
+        Avg_Downloads_Per_Cell: c.data && c.data.hasOwnProperty('Avg_Downloads_Per_Cell') ? (c.data.Avg_Downloads_Per_Cell !== null ? c.data.Avg_Downloads_Per_Cell : 0) : "N/A",
+      }));
+
+    this.setState({
+      uniqueRecords: newUniqueRecords,
+    }, () => {
+      console.log(this.state.uniqueRecords);
+      console.log(this.state.citations);
+    });
+  }
+
+  renderTable() {
+    return (
+      <div style={{
+        maxWidth: '450px',
+        overflow: 'auto',
+        marginRight: '20px',
+        marginTop: '100px',
+        border: '2px solid black',
+        maxHeight: '350px',
+      }} align="right">
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell style={{ width: '50%' }}><b><u>Describing</u></b></TableCell>
+              <TableCell style={{ width: '25%' }}><b><u>Number of Downloads</u></b></TableCell>
+              <TableCell style={{ width: '25%' }}><b><u>Average Downloads per Cell</u></b></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {this.state.uniqueRecords.map((uniqueRecord, key) => (
+              <TableRow key={key}>
+                <TableCell component="th" scope="row">
+                  <div style={{ wordBreak: 'break-all' }}>
+                    {uniqueRecord.pmid && (<div>  <b>pmid:</b>{uniqueRecord.pmid} <br /> </div>)}
+                    {uniqueRecord.doi && (<div> <b>doi:</b>{uniqueRecord.doi} </div>)}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div style={{ wordBreak: 'break-all' }}>
+                    {uniqueRecord.Number_of_Downloads}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div style={{ wordBreak: 'break-all' }}>
+                    {uniqueRecord.Avg_Downloads_Per_Cell}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
+
+
   render() {
+    const isUniqueRecordsEmpty = this.state.uniqueRecords.length === 0;
 
     return (
-      <div className="App">
-        <BibliometricApp
-          onResult={results => {
-            this.setState({ citations: [] })
-            this.setState({ citations: results })
+     <div className="App">
+       <div style={{ width: '100%', justifyContent: 'space-between', display: 'flex', flexDirection: 'row' }}>
+        <div style={{ flex: 1 }} align="right">
+          <BibliometricApp
+            onResult={results => {
+              this.setState({ citations: [] })
+              this.setState({ citations: results })
 
-            console.log(results)
-            console.log(this.state.citations)
+              this.setState({ citations: results }, () => {
+                  this.handleUniqueRecords();
+              });
 
-          }}
-        />
+              console.log(results)
+              console.log(this.state.citations)
+            }}
+          />
+        </div>
+
+        <div>
+            {this.state.citations.map((item, key) => {
+                if (!this.state.displayedPmids.has(item.data.pmid) &&
+                    !this.state.displayedDois.has(item.data.doi)) {
+                  this.state.displayedPmids.add(item.data.pmid);
+                  this.state.displayedDois.add(item.data.doi);
+                  this.state.displayedDownloads.add(item.data.Number_of_Downloads);
+                  this.state.displayedAvgDownloads.add(item.data.Avg_Downloads_Per_Cell);
+
+                  this.handleUniqueRecords(item);
+                }
+              return null; // Don't render div if condition not met
+            })}
+            { !isUniqueRecordsEmpty && this.renderTable() }
+          </div>
+        </div>
 
         <div>
            {
@@ -48,7 +142,7 @@ export default class App extends React.Component {
                 return (
                     <Paper className="container">
                       <br/><br/>
-                      <div align="left"> <u><b>NMO Describing</b></u> <b>pmid:</b>{item.data.pmid} / <b>doi:</b>{item.data.doi}</div>
+                      <div style={{ marginLeft: '5px' }} align="left"> <u><b>Describing</b></u> <b>pmid:</b>{item.data.pmid} / <b>doi:</b>{item.data.doi}</div>
                       <Table>
                         <TableHead>
                         <TableRow>
@@ -86,7 +180,7 @@ export default class App extends React.Component {
                     <TableHead>
                    <TableRow>
                      <TableCell>
-                   <div align="left"> <u><b>NMO Describing id: </b></u> {item.id}
+                   <div style={{ marginLeft: '1px', fontSize: '16px' }} align="left"> <u><b>Describing</b></u> <b> id: </b> {item.id}
                       <br/>
                       <div align="left"> <h4>{this.state.res1Message1} {this.state.res1Message2}  {<a href="mailto:nmadmin@gmu.edu">nmadmin@gmu.edu</a>} </h4> </div>
                    </div>
@@ -103,7 +197,7 @@ export default class App extends React.Component {
                     <TableHead>
                    <TableRow>
                      <TableCell>
-                   <div align="left"> <u><b>NMO Describing id: </b></u> {item.id}
+                   <div style={{ marginLeft: '1px', fontSize: '16px' }} align="left"> <u><b>Describing </b></u>  <b> id: </b> {item.id}
                       <br/>
                       <div align="left"> <h4>{this.state.res2Message1} {this.state.res2Message2}  {<a href="mailto:nmadmin@gmu.edu">nmadmin@gmu.edu</a>} </h4> </div>
                    </div>
