@@ -2,7 +2,8 @@ import React, { createRef, Component } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Button from '@material-ui/core/Button';
-import { createMuiTheme } from '@material-ui/core/styles';
+//import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
@@ -239,6 +240,7 @@ class BibliometricApp extends Component {
       .then(res => res.json())
       .then(
         result => {
+          console.log("Fetch successful");
           this.setState({
             isLoaded: true,
             items: result
@@ -246,6 +248,7 @@ class BibliometricApp extends Component {
 
         },
         error => {
+          console.error("Fetch error:", error);
           this.setState({
             isLoaded: true,
             error: error
@@ -264,6 +267,7 @@ class BibliometricApp extends Component {
     .then(res => res.json())
     .then(
       result => {
+        console.log("Fetch successful");
         this.setState({
           all_descs: result
         });
@@ -289,6 +293,7 @@ class BibliometricApp extends Component {
 
       },
       error => {
+        console.error("Fetch error:", error);
         this.setState({
           error: error
         });
@@ -301,7 +306,7 @@ class BibliometricApp extends Component {
     const subscribeLabel = "Get alert for PMID/DOI"
     const searchLabel = "Search PMID/DOI"
     const txtLabel = "NeuroMorpho.Org"
-    const theme = createMuiTheme({
+    const theme = createTheme({
       palette: {
         primary: {
           main: '#1a237e',
@@ -342,7 +347,7 @@ class BibliometricApp extends Component {
 		          </div>
 
             </div>
-            <table cellpadding="0" cellspacing="0" width="100%" border="0">
+            <table cellPadding="0" cellSpacing="0" width="100%" border="0">
              <tbody>
               <tr>
               <td width="40%">
@@ -367,6 +372,7 @@ class BibliometricApp extends Component {
                       placeholder="Select ID"
                       value={this.state.value_num}
                       inputRef={element => (this.textRef = element)}
+                      style={{ width: '450px' }}
                       //onSelect={this.handleIdSelect}
                       onChange={this.handleIdChange}
                     />
